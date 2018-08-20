@@ -1,0 +1,29 @@
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: pod-labler
+  namespace: elk
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - update
+  - patch
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: elk-pod-labler
+  namespace: elk
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pod-labler
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: elk

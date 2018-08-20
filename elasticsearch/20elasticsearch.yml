@@ -1,0 +1,55 @@
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html
+kind: StatefulSet
+metadata:
+  name: elasticsearch
+  namespace: elk
+spec:
+  selector:
+    matchLabels:
+      app: elasticsearch
+  serviceName: "broker"
+  replicas: 1
+  updateStrategy:
+    type: OnDelete
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+      annotations:
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: elasticsearch
+        image: docker.elastic.co/elasticsearch/elasticsearch:6.3.2
+        env:
+        - name: ES_JAVA_OPTS
+          value: "-Xms1g -Xmx1g"
+        ports:
+        - containerPort: 9200
+        - containerPort: 9300
+        resources:
+          requests:
+            cpu: 100m
+            memory: 512Mi
+        readinessProbe:
+          tcpSocket:
+            port: 9200
+          timeoutSeconds: 1
+        volumeMounts:
+        - name: config
+          mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+        - name: data
+          mountPath: /usr/share/elasticsearch/data
+      volumes:
+      - name: configmap
+        configMap:
+          name: elasticsearch.yml
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteMany" ]
+      storageClassName: elasticsearch
+      resources:
+        requests:
+          storage: 50Gi

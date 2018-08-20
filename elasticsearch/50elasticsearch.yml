@@ -1,4 +1,5 @@
 # https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: elasticsearch
@@ -7,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: elasticsearch
-  serviceName: "broker"
+  serviceName: "elasticsearch-service"
   replicas: 1
   updateStrategy:
     type: OnDelete
@@ -24,31 +25,41 @@ spec:
         env:
         - name: ES_JAVA_OPTS
           value: "-Xms1g -Xmx1g"
-        ports:
-        - containerPort: 9200
-        - containerPort: 9300
         resources:
           requests:
-            cpu: 100m
-            memory: 512Mi
-        readinessProbe:
+            cpu: 0.25
+          limits:
+            cpu: 1
+        ports:
+        - containerPort: 9200
+          name: http
+        - containerPort: 9300
+          name: transport
+        livenessProbe:
           tcpSocket:
-            port: 9200
-          timeoutSeconds: 1
+            port: transport
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /_cluster/health
+            port: http
+          initialDelaySeconds: 20
+          timeoutSeconds: 5
         volumeMounts:
         - name: config
-          mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+          mountPath: /usr/share/elasticsearch/config
         - name: data
           mountPath: /usr/share/elasticsearch/data
       volumes:
-      - name: configmap
+      - name: config
         configMap:
-          name: elasticsearch.yml
+          name: elasticsearch-config
   volumeClaimTemplates:
   - metadata:
       name: data
     spec:
-      accessModes: [ "ReadWriteMany" ]
+      accessModes: [ "ReadWriteOnce" ]
       storageClassName: elasticsearch
       resources:
         requests:

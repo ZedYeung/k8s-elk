@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: expose-kibana
+  namespace: elk
+spec:
+  selector:
+    app: kibana
+  externalTrafficPolicy: Local
+  ports:
+  - protocol: TCP
+    targetPort: 5601
+    port: 30601
+    nodePort: 30601
+  type: NodePort

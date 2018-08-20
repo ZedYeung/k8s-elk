@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: expose-elasticsearch
+  namespace: elk
+spec:
+  selector:
+    app: elasticsearch
+  externalTrafficPolicy: Local
+  ports:
+  - protocol: TCP
+    targetPort: 9200
+    port: 30200
+    nodePort: 30200
+  type: NodePort

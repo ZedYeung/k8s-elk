@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash
+  namespace: elk
+spec:
+  ports:
+  - port: 9600
+    name: monitoring
+  - port: 5044
+    name: logstash
+  clusterIP: None
+  selector:
+    app: logstash

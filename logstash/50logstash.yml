@@ -1,0 +1,61 @@
+# https://www.elastic.co/guide/en/logstash/reference/current/docker.html
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: logstash
+  namespace: elk
+spec:
+  selector:
+    matchLabels:
+      app: logstash
+  serviceName: "logstash-service"
+  replicas: 1
+  updateStrategy:
+    type: OnDelete
+  template:
+    metadata:
+      labels:
+        app: logstash
+      annotations:
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: logstash
+        image: docker.elastic.co/logstash/logstash:6.3.2
+        env:
+          - name: LS_JAVA_OPTS
+            value: -Xmx256m -Xms256m
+        ports:
+        - containerPort: 9600
+          name: monitoring
+        - containerPort: 5044
+          name: logstash
+        resources:
+          limits:
+            cpu:    1.0
+            memory: 500Mi
+          requests:
+            cpu:    0.5
+            memory: 300Mi
+        volumeMounts:
+        - name: config
+          mountPath: /usr/share/logstash/config
+        - name: logstash-pipeline-pv
+          mountPath: /usr/share/logstash/pipeline
+      volumes:
+      - name: config
+        configMap:
+          name: logstash-config
+      - name: logstash-pipeline-pv
+        persistentVolumeClaim:
+          claimName: logstash-pipeline-pv-claim
+  # volumeClaimTemplates:
+  # - metadata:
+  #     name: pipeline
+  #   spec:
+  #     accessModes:
+  #     - ReadWriteOnce
+  #     storageClassName: logstash-pipeline
+  #     resources:
+  #       requests:
+  #         storage: 100Mi

@@ -1,0 +1,40 @@
+# https://www.elastic.co/guide/en/kibana/reference/current/docker.html
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kibana
+  namespace: elk
+spec:
+  selector:
+    matchLabels:
+      app: kibana
+  serviceName: "kibana-service"
+  replicas: 1
+  updateStrategy:
+    type: OnDelete
+  template:
+    metadata:
+      labels:
+        app: kibana
+      annotations:
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: kibana
+        image: docker.elastic.co/kibana/kibana:6.3.2
+        ports:
+        - containerPort: 5601
+        resources:
+          limits:
+            cpu:    1.0
+            memory: 500Mi
+          requests:
+            cpu:    0.5
+            memory: 300Mi
+        volumeMounts:
+        - name: config
+          mountPath: /usr/share/kibana/config
+      volumes:
+      - name: config
+        configMap:
+          name: kibana-config

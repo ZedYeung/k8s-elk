@@ -1,0 +1,14 @@
+kind: ConfigMap
+metadata:
+  name: kibana-config
+  namespace: elk
+apiVersion: v1
+data:
+  kibana.yml: |-
+    # Default Kibana configuration from kibana-docker.
+    # https://github.com/elastic/kibana-docker/blob/master/build/kibana/config/kibana-full.yml
+
+    server.name: kibana
+    server.host: "0"
+    elasticsearch.url: http://elasticsearch:9200
+    xpack.monitoring.ui.container.elasticsearch.enabled: true

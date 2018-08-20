@@ -1,0 +1,7 @@
+kind: ConfigMap
+metadata:
+  name: filebeat-config
+  namespace: elk
+apiVersion: v1
+data:
+  filebeat.yml: |-

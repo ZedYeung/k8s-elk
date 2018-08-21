@@ -2,8 +2,9 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: logstash-pipeline-pv-claim
+  namespace: elk
 spec:
-  storageClassName: logstash-pipeline
+  storageClassName: manual
   accessModes:
     - ReadWriteOnce
   resources:

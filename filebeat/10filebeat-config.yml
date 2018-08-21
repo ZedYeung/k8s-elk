@@ -5,3 +5,58 @@ metadata:
 apiVersion: v1
 data:
   filebeat.yml: |-
+    filebeat.inputs:
+
+    # Each - is an input. Most options can be set at the input level, so
+    # you can use different inputs for various configurations.
+    # Below are the input specific configurations.
+    # https://www.elastic.co/blog/enrich-docker-logs-with-filebeat
+    - type: log
+      enabled: true
+      paths:
+       - /var/lib/docker/containers/*/*.log
+      tags: ["docker"]
+      json.message_key: log
+      json.keys_under_root: true
+      processors:
+      - add_docker_metadata: ~
+
+    - type: log
+      enabled: true
+      paths:
+       - /var/log/fail2ban.log
+      tags: ["fail2ban"]
+
+    #============================= Filebeat modules ===============================
+
+    filebeat.config.modules:
+      # Glob pattern for configuration loading
+      path: ${path.config}/modules.d/*.yml
+
+      # Set to true to enable config reloading
+      reload.enabled: false
+
+      # Period on which files under path should be checked for changes
+      #reload.period: 10s
+
+    #==================== Elasticsearch template setting ==========================
+
+    setup.template.settings:
+      index.number_of_shards: 3
+      #index.codec: best_compression
+      #_source.enabled: false
+
+    #----------------------------- Logstash output --------------------------------
+    output.logstash:
+      # The Logstash hosts
+      hosts: ["logstash:5044"]
+
+      # Optional SSL. By default is off.
+      # List of root certificates for HTTPS server verifications
+      # ssl.certificate_authorities: ["/etc/pki/tls/certs/logstash-beats.crt"]
+
+      # Certificate for SSL client authentication
+      #ssl.certificate: "/etc/pki/client/cert.pem"
+
+      # Client Certificate Key
+      #ssl.key: "/etc/pki/client/cert.key"

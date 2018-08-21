@@ -8,7 +8,6 @@ spec:
   selector:
     matchLabels:
       app: filebeat
-  replicas: 1
   template:
     metadata:
       labels:
@@ -16,9 +15,21 @@ spec:
       annotations:
     spec:
       terminationGracePeriodSeconds: 30
+      initContainers:
+      - name: volume-mount-hack
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["sh", "-c", "chown -R 1000:1000 /var"]
+        volumeMounts:
+        - name: log
+          mountPath: /var
       containers:
       - name: filebeat
         image: docker.elastic.co/beats/filebeat:6.3.2
+        args: [
+          "-c", "/etc/filebeat.yml",
+          "-e",
+        ]
         resources:
           limits:
             memory: 200Mi
@@ -27,8 +38,13 @@ spec:
             memory: 100Mi
         volumeMounts:
         - name: config
-          mountPath: /usr/share/filebeat
+          mountPath: /etc/filebeat.yml
+          subPath: filebeat.yml
       volumes:
       - name: config
         configMap:
           name: filebeat-config
+      - name: log
+        hostPath:
+          path: /var
+          type: DirectoryOrCreate

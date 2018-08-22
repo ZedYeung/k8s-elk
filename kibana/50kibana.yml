@@ -33,7 +33,8 @@ spec:
             memory: 300Mi
         volumeMounts:
         - name: config
-          mountPath: /usr/share/kibana/config
+          mountPath: /usr/share/kibana/config/kibana.yml
+          subPath: kibana.yml
       volumes:
       - name: config
         configMap:

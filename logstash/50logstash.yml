@@ -39,16 +39,17 @@ spec:
             memory: 300Mi
         volumeMounts:
         - name: config
-          mountPath: /usr/share/logstash/config
-        - name: logstash-pipeline
-          mountPath: /usr/share/logstash/pipeline
+          mountPath: /usr/share/logstash/config/logstash.yml
+          subPath: logstash.yml
+        # - name: logstash-pipeline
+        #   mountPath: /usr/share/logstash/pipeline
       volumes:
       - name: config
         configMap:
           name: logstash-config
-      - name: logstash-pipeline
-        hostPath:
-          path: /usr/share/logstash/pipeline
+      # - name: logstash-pipeline
+      #   hostPath:
+      #     path: /usr/share/logstash/pipeline
         # persistentVolumeClaim:
         #   claimName: logstash-pipeline-pv-claim
   # volumeClaimTemplates:

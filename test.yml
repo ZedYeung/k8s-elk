@@ -1,0 +1,39 @@
+# https://www.elastic.co/guide/en/busybox/reference/current/docker.html
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: test
+  namespace: elk
+spec:
+  selector:
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      labels:
+        app: test
+      annotations:
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: test
+        image: byrnedo/alpine-curl
+        imagePullPolicy: IfNotPresent
+        command:
+          - sleep
+          - "3600"
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu:    100m
+            memory: 100Mi
+        volumeMounts:
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+        # - name: docker-sock
+        #   mountPath: /var/run/docker.sock
+      volumes:
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock

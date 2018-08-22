@@ -1,0 +1,30 @@
+# https://www.elastic.co/guide/en/busybox/reference/current/docker.html
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: test-without-mount
+  namespace: elk
+spec:
+  selector:
+    matchLabels:
+      app: test-without-mount
+  template:
+    metadata:
+      labels:
+        app: test-without-mount
+      annotations:
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: test-without-mount
+        image: byrnedo/alpine-curl
+        imagePullPolicy: IfNotPresent
+        command:
+          - sleep
+          - "3600"
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu:    100m
+            memory: 100Mi

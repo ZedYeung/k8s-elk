@@ -18,8 +18,8 @@ data:
       tags: ["docker"]
       json.message_key: log
       json.keys_under_root: true
-      processors:
-      - add_docker_metadata: ~
+      # processors:
+      # - add_docker_metadata: ~
 
     - type: log
       enabled: true
@@ -47,9 +47,9 @@ data:
       #_source.enabled: false
 
     #----------------------------- Logstash output --------------------------------
-    output.logstash:
+    # output.logstash:
       # The Logstash hosts
-      hosts: ["logstash:5044"]
+      # hosts: ["logstash:5044"]
 
       # Optional SSL. By default is off.
       # List of root certificates for HTTPS server verifications
@@ -60,3 +60,8 @@ data:
 
       # Client Certificate Key
       #ssl.key: "/etc/pki/client/cert.key"
+
+    #-------------------------- Elasticsearch output ------------------------------
+    output.elasticsearch:
+      # Array of hosts to connect to.
+      hosts: ["elasticsearch:9200"]

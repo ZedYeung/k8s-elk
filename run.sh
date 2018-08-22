@@ -1,6 +1,6 @@
 #!/bin/bash
-sudo mkdir -p /var/lib/docker/logstash/pipeline
-cp -r ./logstash/pipeline/. /var/lib/docker/logstash/pipeline
+sudo mkdir -p /usr/share/logstash
+sudo cp -r ./logstash/pipeline /usr/share/logstash/
 
 kubectl apply -f ./storage_class
 
@@ -14,4 +14,4 @@ kubectl apply -f ./logstash/
 kubectl apply -f ./filebeat/
 
 kubectl apply -f ./localhost-services/
-echo $(minikube ip)
+# echo $(minikube ip)

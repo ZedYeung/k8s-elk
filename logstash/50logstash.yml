@@ -40,15 +40,17 @@ spec:
         volumeMounts:
         - name: config
           mountPath: /usr/share/logstash/config
-        - name: logstash-pipeline-pv
+        - name: logstash-pipeline
           mountPath: /usr/share/logstash/pipeline
       volumes:
       - name: config
         configMap:
           name: logstash-config
-      - name: logstash-pipeline-pv
-        persistentVolumeClaim:
-          claimName: logstash-pipeline-pv-claim
+      - name: logstash-pipeline
+        hostPath:
+          path: /usr/share/logstash/pipeline
+        # persistentVolumeClaim:
+        #   claimName: logstash-pipeline-pv-claim
   # volumeClaimTemplates:
   # - metadata:
   #     name: pipeline

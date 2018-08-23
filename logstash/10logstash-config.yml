@@ -8,6 +8,7 @@ data:
     # https://github.com/elastic/logstash-docker/blob/master/build/logstash/config/logstash-full.yml
     http.host: "0.0.0.0"
     xpack.monitoring.elasticsearch.url: http://elasticsearch:9200
+    xpack.monitoring.enabled: true
 
   logstash.conf: |-
     input {
@@ -17,9 +18,10 @@ data:
     }
 
     output {
-    	elasticsearch {
-    		hosts => "elasticsearch:9200"
-    	}
+      elasticsearch {
+        index => "logstash-%{+YYYY.MM.dd}"
+        hosts => "elasticsearch:9200"
+      }
     }
   # log4j2.properties: |-
   #   status = error

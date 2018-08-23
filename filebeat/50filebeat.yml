@@ -18,10 +18,22 @@ spec:
       # securityContext:
       #   runAsUser: 1000
       #   fsGroup: 1000
+      initContainers:
+      - name: init-config
+        image: busybox
+        command: ['sh', '/etc/filebeat/init.sh']
+        volumeMounts:
+        - name: var
+          mountPath: /var
+        - name: init-config
+          mountPath: /etc/filebeat
       containers:
       - name: filebeat
         image: docker.elastic.co/beats/filebeat:6.3.2
         # args: ["-c", "/etc/filebeat/filebeat.yml", "-e"]
+        # securityContext:
+        #   runAsUser: 1000
+          # fsGroup: 1000
         resources:
           limits:
             memory: 200Mi
@@ -32,10 +44,12 @@ spec:
         - name: config
           mountPath: /usr/share/filebeat/filebeat.yml
           subPath: filebeat.yml
-        # - name: var
-        #   mountPath: /var
         - name: var
           mountPath: /var
+        # - name: log
+        #   mountPath: /var/log
+        # - name: docker-log
+        #   mountPath: /var/lib/docker
         # - name: docker-sock
         #   mountPath: /var/run/docker.sock
         # - name: docker-log
@@ -46,6 +60,9 @@ spec:
       - name: config
         configMap:
           name: filebeat-config
+      # - name: init-config
+      #   configMap:
+      #     name: init-config
       # - name: docker-sock
       #   hostPath:
       #     path: /var/run/docker.sock
@@ -55,10 +72,13 @@ spec:
       # - name: log
       #   hostPath:
       #     path: /var/log
+      # - name: log
+      #   hostPath:
+      #     path: /tmp/var/log
+      # - name: docker-log
+      #   hostPath:
+      #     path: /tmp/var/lib/docker
       - name: var
         hostPath:
-          path: /tmp/var
-      # - name: var
-      #   hostPath:
-      #     path: /var
+          path: /var
       #     type: DirectoryOrCreate

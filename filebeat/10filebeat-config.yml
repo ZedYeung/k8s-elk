@@ -33,6 +33,12 @@ data:
         - /var/log/auth.log
       tags: ["auth"]
 
+    - type: log
+      enabled: true
+      paths:
+        - /var/log/syslog
+      tags: ["syslog"]
+
 
     #============================= Filebeat modules ===============================
 

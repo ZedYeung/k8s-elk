@@ -9,6 +9,18 @@ data:
     http.host: "0.0.0.0"
     xpack.monitoring.elasticsearch.url: http://elasticsearch:9200
 
+  logstash.conf: |-
+    input {
+    	beats {
+    		port => 5044
+    	}
+    }
+
+    output {
+    	elasticsearch {
+    		hosts => "elasticsearch:9200"
+    	}
+    }
   # log4j2.properties: |-
   #   status = error
   #   name = LogstashPropertiesConfig

@@ -15,9 +15,9 @@ spec:
       annotations:
     spec:
       terminationGracePeriodSeconds: 30
-      securityContext:
-        runAsUser: 1000
-        fsGroup: 1000
+      # securityContext:
+      #   runAsUser: 1000
+      #   fsGroup: 1000
       containers:
       - name: filebeat
         image: docker.elastic.co/beats/filebeat:6.3.2
@@ -34,25 +34,30 @@ spec:
           subPath: filebeat.yml
         # - name: var
         #   mountPath: /var
-        - name: docker-sock
-          mountPath: /var/run/docker.sock
-        - name: docker-log
-          mountPath: /var/lib/docker
-        - name: log
-          mountPath: /var/log
+        - name: var
+          mountPath: /var
+        # - name: docker-sock
+        #   mountPath: /var/run/docker.sock
+        # - name: docker-log
+        #   mountPath: /var/lib/docker
+        # - name: log
+        #   mountPath: /var/log
       volumes:
       - name: config
         configMap:
           name: filebeat-config
-      - name: docker-sock
+      # - name: docker-sock
+      #   hostPath:
+      #     path: /var/run/docker.sock
+      # - name: docker-log
+      #   hostPath:
+      #     path: /var/lib/docker
+      # - name: log
+      #   hostPath:
+      #     path: /var/log
+      - name: var
         hostPath:
-          path: /var/run/docker.sock
-      - name: docker-log
-        hostPath:
-          path: /var/lib/docker
-      - name: log
-        hostPath:
-          path: /var/log
+          path: /tmp/var
       # - name: var
       #   hostPath:
       #     path: /var

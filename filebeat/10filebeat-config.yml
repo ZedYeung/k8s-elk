@@ -14,7 +14,7 @@ data:
     - type: log
       enabled: true
       paths:
-       - /var/lib/docker/containers/*/*.log
+        - /var/lib/docker/containers/*/*.log
       tags: ["docker"]
       json.message_key: log
       json.keys_under_root: true
@@ -24,8 +24,15 @@ data:
     - type: log
       enabled: true
       paths:
-       - /var/log/fail2ban.log
+        - /var/log/fail2ban.log
       tags: ["fail2ban"]
+
+    - type: log
+      enabled: true
+      paths:
+        - /var/log/auth.log
+      tags: ["auth"]
+
 
     #============================= Filebeat modules ===============================
 
@@ -47,9 +54,9 @@ data:
       #_source.enabled: false
 
     #----------------------------- Logstash output --------------------------------
-    # output.logstash:
+    output.logstash:
       # The Logstash hosts
-      # hosts: ["logstash:5044"]
+      hosts: ["logstash:5044"]
 
       # Optional SSL. By default is off.
       # List of root certificates for HTTPS server verifications
@@ -62,6 +69,6 @@ data:
       #ssl.key: "/etc/pki/client/cert.key"
 
     #-------------------------- Elasticsearch output ------------------------------
-    output.elasticsearch:
+    # output.elasticsearch:
       # Array of hosts to connect to.
-      hosts: ["elasticsearch:9200"]
+      # hosts: ["elasticsearch:9200"]

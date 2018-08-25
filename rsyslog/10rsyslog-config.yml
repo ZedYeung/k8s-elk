@@ -1,0 +1,32 @@
+kind: ConfigMap
+metadata:
+  name: rsyslog-config
+  namespace: elk
+apiVersion: v1
+data:
+  rsyslog.conf: |-
+    global(processInternalMessages="on")
+
+    # #module(load="imtcp" StreamDriver.AuthMode="anon" StreamDriver.Mode="1")
+    # module(load="impstats") # config.enabled=`echo $ENABLE_STATISTICS`)
+    # module(load="imrelp")
+    # module(load="imptcp")
+    # module(load="imudp" TimeRequery="500")
+
+    module(load="omstdout")
+    # module(load="omelasticsearch")
+
+    module(load="mmjsonparse")
+    module(load="mmutf8fix")
+
+
+    # input(type="imptcp" port="514")
+    # input(type="imudp" port="514")
+    # input(type="imrelp" port="1601")
+
+    # includes done explicitely
+    # include(file="/etc/rsyslog.conf.d/log_to_logsene.conf" config.enabled=`echo $ENABLE_LOGSENE`)
+    # include(file="/etc/rsyslog.conf.d/log_to_files.conf" config.enabled=`echo $ENABLE_LOGFILES`)
+
+    # *.*	@@fluentd:5140
+    *.* :omstdout:

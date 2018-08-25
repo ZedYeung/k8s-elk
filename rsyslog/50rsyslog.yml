@@ -1,0 +1,44 @@
+# https://www.elastic.co/guide/en/rsyslog/reference/current/docker.html
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: rsyslog
+  namespace: elk
+spec:
+  selector:
+    matchLabels:
+      app: rsyslog
+  template:
+    metadata:
+      labels:
+        app: rsyslog
+      annotations:
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: rsyslog
+        image: rsyslog/syslog_appliance_alpine
+        env:
+        - name: RSYSLOG_CONF
+          value: /config/rsyslog.conf
+        securityContext:
+          runAsUser: 0
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu:    100m
+            memory: 100Mi
+        volumeMounts:
+        - name: config
+          mountPath: /config/rsyslog.conf
+          subPath: rsyslog.conf
+        - name: log
+          mountPath: /var/log
+      volumes:
+      - name: config
+        configMap:
+          name: rsyslog-config
+      - name: log
+        hostPath:
+          path: /tmp/var/log

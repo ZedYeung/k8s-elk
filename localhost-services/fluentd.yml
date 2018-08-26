@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: expose-fluentd
+  namespace: elk
+spec:
+  selector:
+    app: fluentd
+  externalTrafficPolicy: Local
+  ports:
+  - protocol: TCP
+    targetPort: 5140
+    port: 30514
+    nodePort: 30514
+  type: NodePort

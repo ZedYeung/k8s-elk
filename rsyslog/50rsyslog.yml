@@ -15,14 +15,16 @@ spec:
       annotations:
     spec:
       terminationGracePeriodSeconds: 30
+      initContainers:
+      - name: init-config
+        image: rsyslog/syslog_appliance_alpine
+        command: ["/bin/sh", "-c", "adduser rsyslog adm"]
       containers:
       - name: rsyslog
         image: rsyslog/syslog_appliance_alpine
         env:
         - name: RSYSLOG_CONF
           value: /config/rsyslog.conf
-        securityContext:
-          runAsUser: 0
         resources:
           limits:
             memory: 200Mi

@@ -1,0 +1,170 @@
+kind: ConfigMap
+metadata:
+  name: logstash-pipeline
+  namespace: elk
+apiVersion: v1
+data:
+  11kafka-input.conf: |-
+    input {
+      kafka {
+        bootstrap_servers => "bootstrap.kafka.svc.cluster.local:9092"
+        topics => ["fail2ban", "rsyslog", "dummy"]
+
+        group_id => "logstash_elastic"
+
+        client_id => "logstash"
+        consumer_threads => 1
+
+        auto_offset_reset => "earliest"
+        codec => plain { format => "%{message}" }
+        decorate_events => true
+      }
+    }
+
+  # elasticsearch-output: |-
+  #   output {
+  #     elasticsearch {
+  #       index => "logstash-%{+YYYY.MM.dd}"
+  #       hosts => "elasticsearch:9200"
+  #     }
+  #   }
+
+  21rsyslog-filter: |-
+    filter {
+      if "rsyslog" == [@metadata][kafka][topic]
+      {
+        json {
+          source => "message"
+        }
+
+        if [ident] == "ssserver" or [ident] == "ss-server"
+        {
+          grok {
+            match => {"message" => [
+              "%{TIMESTAMP_ISO8601} %{LOGLEVEL:log_level}%{SPACE}connecting %{IP}:%{NUMBER} from %{IP:client_ip}:%{NUMBER:client_port}",
+              "%{TIMESTAMP_ISO8601} %{LOGLEVEL:log_level}%{SPACE}can not parse header when handling connection from %{IP:client_ip}:%{NUMBER:client_port}",
+              "%{TIMESTAMP_ISO8601} %{LOGLEVEL:log_level}: failed to handshake with %{IP:client_ip}: authentication error"
+            ]}
+
+            remove_field => ["message"]
+          }
+
+          geoip {
+            source => "client_ip"
+          }
+        }
+        else if [ident] == 'sshd'
+        {
+          grok {
+            match => { "message" => [
+              "%{DATA:[ssh][event]} %{DATA:[ssh][method]} for (invalid user )?%{DATA:[user]} from %{IPORHOST:client_ip} port %{NUMBER:client_port} ssh2(: %{GREEDYDATA:[ssh][signature]})?",
+              "%{DATA:[ssh][event]} user %{DATA:[user]} from %{IPORHOST:client_ip}",
+              "%{DATA:[ssh][event]} from ((authenticating )?user %{DATA:user} )?%{IPORHOST:client_ip} port %{NUMBER:client_port}\s*(?:\[%{GREEDYDATA:[ssh][privsep]}\]|)",
+              "Did not receive identification string from %{IPORHOST:client_ip}"
+            ]}
+          }
+
+          geoip {
+            source => "client_ip"
+          }
+        }
+        else if [ident] == 'sudo'
+        {
+          grok {
+            match => { "message" => ["\s*%{DATA:[user]} :( %{DATA:[sudo][error]} ;)? TTY=%{DATA:[sudo][tty]} ; PWD=%{DATA:[sudo][pwd]} ; USER=%{DATA:[sudo][user]} ; COMMAND=%{GREEDYDATA:[sudo][command]}"]}
+          }
+        }
+        else
+        {
+          drop { }
+        }
+      }
+    }
+
+  23fail2ban-filter: |-
+    filter {
+      if "fail2ban" == [@metadata][kafka][topic]
+      {
+        grok {
+          match => {"message" => [
+            "%{TIMESTAMP_ISO8601} %{PROG:ident}%{SPACE}(?:\[%{POSINT:pid}\])?: %{LOGLEVEL:log_level}%{SPACE}%{GREEDYDATA:message}"
+          ]}
+          overwrite => ["message"]
+        }
+
+        if [log_level] == "INFO"
+        {
+          drop { }
+        }
+        else
+        {
+          grok {
+            match => {"message" => [
+              "\[%{PROG:app}\] %{WORD:action} %{IP:client_ip}"
+            ]}
+
+            remove_field => ["message"]
+          }
+
+          geoip {
+            source => "client_ip"
+          }
+        }
+      }
+    }
+
+  # output.conf: |-
+  #   output {
+  #     stdout {
+  #       codec  => rubydebug {
+  #         metadata => true
+  #       }
+  #     }
+  #   }
+
+  31rsyslog-output.conf: |-
+    output {
+      if "rsyslog" == [@metadata][kafka][topic] {
+        if [ident] == "ssserver" or [ident] == "ss-server" {
+          elasticsearch {
+            index => "shadowsocks-%{+YYYY.MM.dd}"
+            hosts => "elasticsearch:9200"
+          }
+        } else {
+          elasticsearch {
+            index => "%{[ident]}-%{+YYYY.MM.dd}"
+            hosts => "elasticsearch:9200"
+          }
+        }
+      }
+    }
+
+  32docker-output.conf: |-
+    output {
+      if "docker" == [@metadata][kafka][topic] {
+        elasticsearch {
+          index => "docker-%{+YYYY.MM.dd}"
+          hosts => "elasticsearch:9200"
+        }
+      }
+    }
+
+  33fail2ban-output.conf: |-
+    output {
+      if "fail2ban" == [@metadata][kafka][topic] {
+        elasticsearch {
+          index => "fail2ban-%{+YYYY.MM.dd}"
+          hosts => "elasticsearch:9200"
+        }
+      }
+    }
+
+  # 34dummy-output.conf: |-
+  #   output {
+  #     if "dummy" == [@metadata][kafka][topic] {
+  #       elasticsearch {
+  #         index => "dummy-%{+YYYY.MM.dd}"
+  #         hosts => "elasticsearch:9200"
+  #       }
+  #     }
+  #   }

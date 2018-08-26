@@ -30,6 +30,8 @@ spec:
           name: monitoring
         - containerPort: 5044
           name: logstash
+        - containerPort: 514
+          name: rsyslog
         resources:
           limits:
             cpu:    1.0
@@ -41,37 +43,12 @@ spec:
         - name: config
           mountPath: /usr/share/logstash/config/logstash.yml
           subPath: logstash.yml
-          # mountPath: /usr/share/logstash/config
-        - name: pipeline
-          mountPath: /usr/share/logstash/pipeline/logstash.conf
-          subPath: logstash.conf
-        # - name: logstash-pipeline
-        #   mountPath: /usr/share/logstash/pipeline
+        - name: logstash-pipeline
+          mountPath: /usr/share/logstash/pipeline
       volumes:
       - name: config
         configMap:
           name: logstash-config
-          items:
-          - key: logstash.yml
-            path: logstash.yml
-      - name: pipeline
+      - name: logstash-pipeline
         configMap:
-          name: logstash-config
-          items:
-          - key: logstash.conf
-            path: logstash.conf
-      # - name: logstash-pipeline
-      #   hostPath:
-      #     path: /usr/share/logstash/pipeline
-        # persistentVolumeClaim:
-        #   claimName: logstash-pipeline-pv-claim
-  # volumeClaimTemplates:
-  # - metadata:
-  #     name: pipeline
-  #   spec:
-  #     accessModes:
-  #     - ReadWriteOnce
-  #     storageClassName: logstash-pipeline
-  #     resources:
-  #       requests:
-  #         storage: 100Mi
+          name: logstash-pipeline

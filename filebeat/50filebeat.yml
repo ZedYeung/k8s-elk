@@ -3,7 +3,9 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: filebeat
-  namespace: elk
+  namespace: kube-system
+  labels:
+    app: filebeat
 spec:
   selector:
     matchLabels:
@@ -34,41 +36,13 @@ spec:
         - name: config
           mountPath: /usr/share/filebeat/filebeat.yml
           subPath: filebeat.yml
-        - name: var
-          mountPath: /var
-        # - name: log
-        #   mountPath: /var/log
-        # - name: docker-log
-        #   mountPath: /var/lib/docker
-        # - name: docker-sock
-        #   mountPath: /var/run/docker.sock
-        # - name: docker-log
-        #   mountPath: /var/lib/docker
-        # - name: log
-        #   mountPath: /var/log
+        - name: containers
+          mountPath: /var/lib/docker/containers
       volumes:
       - name: config
         configMap:
           name: filebeat-config
-      # - name: init-config
-      #   configMap:
-      #     name: init-config
-      # - name: docker-sock
-      #   hostPath:
-      #     path: /var/run/docker.sock
-      # - name: docker-log
-      #   hostPath:
-      #     path: /var/lib/docker
-      # - name: log
-      #   hostPath:
-      #     path: /var/log
-      # - name: log
-      #   hostPath:
-      #     path: /tmp/var/log
-      # - name: docker-log
-      #   hostPath:
-      #     path: /tmp/var/lib/docker
-      - name: var
+      - name: containers
         hostPath:
-          path: /var
+          path: /var/lib/docker/containers
       #     type: DirectoryOrCreate

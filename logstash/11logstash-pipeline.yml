@@ -8,7 +8,7 @@ data:
     input {
       kafka {
         bootstrap_servers => "bootstrap.kafka.svc.cluster.local:9092"
-        topics => ["fail2ban", "rsyslog", "dummy", "docker"]
+        topics => ["fail2ban", "rsyslog", "dummy", "docker", "k8s"]
 
         group_id => "logstash_elastic"
 
@@ -138,6 +138,31 @@ data:
       }
     }
 
+  24k8s-filter: |-
+    filter {
+      if "k8s" == [@metadata][kafka][topic]
+      {
+        mutate {
+          copy => { "@metadata" => "@metadata-kafka" }
+        }
+
+        json {
+          source => "message"
+          remove_field => ["message", "fields"]
+        }
+
+        mutate {
+          # add_field => {
+          #   "[@metadata][kafka]" => "%{[@metadata-kafka][kafka]}"
+          # }
+          copy => {
+            "[@metadata-kafka][kafka]" => "[@metadata][kafka]"
+          }
+          remove_field => ["@metadata-kafka"]
+        }
+      }
+    }
+
   # output.conf: |-
   #   output {
   #     stdout {
@@ -185,6 +210,17 @@ data:
       {
         elasticsearch {
           index => "fail2ban-%{+YYYY.MM.dd}"
+          hosts => "elasticsearch:9200"
+        }
+      }
+    }
+
+  34k8s-output.conf: |-
+    output {
+      if "k8s" == [@metadata][kafka][topic]
+      {
+        elasticsearch {
+          index => "k8s-%{+YYYY.MM.dd}"
           hosts => "elasticsearch:9200"
         }
       }

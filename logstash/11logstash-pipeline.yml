@@ -8,7 +8,7 @@ data:
     input {
       kafka {
         bootstrap_servers => "bootstrap.kafka.svc.cluster.local:9092"
-        topics => ["fail2ban", "rsyslog", "dummy"]
+        topics => ["fail2ban", "rsyslog", "dummy", "docker"]
 
         group_id => "logstash_elastic"
 
@@ -81,6 +81,31 @@ data:
       }
     }
 
+  22docker-filter: |-
+    filter {
+      if "docker" == [@metadata][kafka][topic]
+      {
+        mutate {
+          copy => { "@metadata" => "@metadata-kafka" }
+        }
+
+        json {
+          source => "message"
+          remove_field => ["message", "fields"]
+        }
+
+        mutate {
+          # add_field => {
+          #   "[@metadata][kafka]" => "%{[@metadata-kafka][kafka]}"
+          # }
+          copy => {
+            "[@metadata-kafka][kafka]" => "[@metadata][kafka]"
+          }
+          remove_field => ["@metadata-kafka"]
+        }
+      }
+    }
+
   23fail2ban-filter: |-
     filter {
       if "fail2ban" == [@metadata][kafka][topic]
@@ -124,13 +149,17 @@ data:
 
   31rsyslog-output.conf: |-
     output {
-      if "rsyslog" == [@metadata][kafka][topic] {
-        if [ident] == "ssserver" or [ident] == "ss-server" {
+      if "rsyslog" == [@metadata][kafka][topic]
+      {
+        if [ident] == "ssserver" or [ident] == "ss-server"
+        {
           elasticsearch {
             index => "shadowsocks-%{+YYYY.MM.dd}"
             hosts => "elasticsearch:9200"
           }
-        } else {
+        }
+        else
+        {
           elasticsearch {
             index => "%{[ident]}-%{+YYYY.MM.dd}"
             hosts => "elasticsearch:9200"
@@ -141,7 +170,8 @@ data:
 
   32docker-output.conf: |-
     output {
-      if "docker" == [@metadata][kafka][topic] {
+      if "docker" == [@metadata][kafka][topic]
+      {
         elasticsearch {
           index => "docker-%{+YYYY.MM.dd}"
           hosts => "elasticsearch:9200"
@@ -151,7 +181,8 @@ data:
 
   33fail2ban-output.conf: |-
     output {
-      if "fail2ban" == [@metadata][kafka][topic] {
+      if "fail2ban" == [@metadata][kafka][topic]
+      {
         elasticsearch {
           index => "fail2ban-%{+YYYY.MM.dd}"
           hosts => "elasticsearch:9200"

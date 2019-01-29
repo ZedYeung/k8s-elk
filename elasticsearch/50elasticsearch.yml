@@ -9,7 +9,7 @@ spec:
     matchLabels:
       app: elasticsearch
   serviceName: "elasticsearch"
-  replicas: 1
+  replicas: 3
   updateStrategy:
     type: OnDelete
   template:
@@ -23,6 +23,7 @@ spec:
       - name: set-vm-max-map-count
         image: busybox
         imagePullPolicy: IfNotPresent
+        # https://github.com/elastic/elasticsearch-docker/issues/32
         command: ['sh', '-c', 'chown -R 1000:1000 /usr/share/elasticsearch/data && sysctl -w vm.max_map_count=262144']
         securityContext:
           privileged: true

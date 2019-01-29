@@ -9,7 +9,7 @@ spec:
     matchLabels:
       app: kibana
   serviceName: "kibana"
-  replicas: 3
+  replicas: 1
   updateStrategy:
     type: OnDelete
   template:

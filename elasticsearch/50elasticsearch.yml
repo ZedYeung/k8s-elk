@@ -9,7 +9,7 @@ spec:
     matchLabels:
       app: elasticsearch
   serviceName: "elasticsearch"
-  replicas: 3
+  replicas: 1
   updateStrategy:
     type: OnDelete
   template:

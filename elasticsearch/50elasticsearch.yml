@@ -9,7 +9,7 @@ spec:
     matchLabels:
       app: elasticsearch
   serviceName: "elasticsearch"
-  replicas: 1
+  replicas: 3
   updateStrategy:
     type: OnDelete
   template:
@@ -36,6 +36,11 @@ spec:
         # env:
         # - name: ES_JAVA_OPTS
         #   value: "-Xms1g -Xmx1g"
+        env:
+          - name: node.name
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
         resources:
           requests:
             cpu: 0.25

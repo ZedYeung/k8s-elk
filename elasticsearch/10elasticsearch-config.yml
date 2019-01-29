@@ -16,4 +16,4 @@ data:
     # Details: https://github.com/elastic/elasticsearch/pull/17288
     discovery.zen.minimum_master_nodes: 2
 
-    discovery.zen.ping.unicast.hosts: "elasticsearch-0.elasticsearch.default.svc.cluster.local,elasticsearch-1.elasticsearch.default.svc.cluster.local,elasticsearch-2.elasticsearch.default.svc.cluster.local"
+    discovery.zen.ping.unicast.hosts: "elasticsearch-0.elasticsearch.elk.svc.cluster.local,elasticsearch-1.elasticsearch.elk.svc.cluster.local,elasticsearch-2.elasticsearch.elk.svc.cluster.local"

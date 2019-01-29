@@ -2,5 +2,8 @@ kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
   name: logstash-pipeline
-provisioner: k8s.io/minikube-hostpath
+provisioner: kubernetes.io/gce-pd
 reclaimPolicy: Retain
+allowVolumeExpansion: true
+parameters:
+  type: pd-standard
